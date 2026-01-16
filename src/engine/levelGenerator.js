@@ -4,40 +4,42 @@
 // Color names (duplicated here to avoid circular dependency)
 const COLOR_NAMES = ['red', 'blue', 'yellow', 'purple', 'green', 'orange', 'pink'];
 
-// Level configurations - difficulty increases over time
+// Level configurations - smooth difficulty increase per level
 export const LEVELS_CONFIG = {};
 
-// Generate config for all 100 levels
+// Generate config for all 100 levels with smooth progression
+// Difficulty factors: colors (2-7), bottles, and empty bottles (fewer = harder)
 for (let i = 1; i <= 100; i++) {
-    let colors, bottles;
+    // Colors: start at 2, gradually increase to 7
+    // Level 1-10: 2 colors
+    // Level 11-25: 3 colors
+    // Level 26-40: 4 colors
+    // Level 41-60: 5 colors
+    // Level 61-80: 6 colors
+    // Level 81-100: 7 colors
+    let colors;
+    if (i <= 10) colors = 2;
+    else if (i <= 25) colors = 3;
+    else if (i <= 40) colors = 4;
+    else if (i <= 60) colors = 5;
+    else if (i <= 80) colors = 6;
+    else colors = 7;
 
-    if (i <= 5) {
-        colors = 2;
-        bottles = 3;
-    } else if (i <= 10) {
-        colors = 2;
-        bottles = 4;
-    } else if (i <= 20) {
-        colors = 3;
-        bottles = 4;
-    } else if (i <= 35) {
-        colors = 3;
-        bottles = 5;
-    } else if (i <= 50) {
-        colors = 4;
-        bottles = 5;
-    } else if (i <= 70) {
-        colors = 4;
-        bottles = 6;
-    } else if (i <= 85) {
-        colors = 5;
-        bottles = 6;
-    } else {
-        colors = 5;
-        bottles = 7;
-    }
+    // Empty bottles: start with 2, reduce to 1 as levels progress
+    // More empty bottles = easier (more workspace)
+    // Within each color bracket, gradually reduce empty bottles
+    let emptyBottles;
+    if (i <= 5) emptyBottles = 2;  // Very easy start
+    else if (i <= 15) emptyBottles = 2;
+    else if (i <= 30) emptyBottles = Math.random() < 0.5 ? 1 : 2; // Mix
+    else emptyBottles = 1;  // Harder: only 1 empty bottle from level 31+
 
-    LEVELS_CONFIG[i] = { colors, bottles };
+    // For seeded consistency, use level number
+    emptyBottles = (i <= 15) ? 2 : ((i <= 30) ? (i % 2 === 0 ? 2 : 1) : 1);
+
+    const bottles = colors + emptyBottles;
+
+    LEVELS_CONFIG[i] = { colors, bottles, emptyBottles };
 }
 
 // Create a seeded random generator
