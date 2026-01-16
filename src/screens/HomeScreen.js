@@ -1,4 +1,4 @@
-// HomeScreen - Main menu screen
+// HomeScreen - Main menu screen with animated decorations
 import React from 'react';
 import {
     View,
@@ -15,16 +15,15 @@ import Animated, {
     withRepeat,
     withSequence,
     withTiming,
-    withDelay,
 } from 'react-native-reanimated';
 import useGameStore from '../store/gameStore';
+import { SparkleField, FloatingBubbles } from '../components/HomeCharacters';
 
 const HomeScreen = ({ navigation }) => {
     const isSoundEnabled = useGameStore(state => state.isSoundEnabled);
     const toggleSound = useGameStore(state => state.toggleSound);
     const currentLevel = useGameStore(state => state.currentLevel);
     const loadSavedProgress = useGameStore(state => state.loadSavedProgress);
-
 
     // Animated bottle illustration
     const bottleRotate = useSharedValue(0);
@@ -61,8 +60,6 @@ const HomeScreen = ({ navigation }) => {
         navigation.navigate('Game');
     };
 
-
-
     return (
         <View style={styles.container}>
             <StatusBar barStyle="light-content" />
@@ -73,16 +70,22 @@ const HomeScreen = ({ navigation }) => {
                 style={styles.gradient}
             />
 
+            {/* Sparkle effects */}
+            <SparkleField />
+
+            {/* Floating color bubbles */}
+            <FloatingBubbles />
+
             <SafeAreaView style={styles.content}>
                 {/* Animated Bottle Illustration */}
                 <Animated.View style={[styles.bottleIllustration, bottleStyle]}>
                     <View style={styles.demoBotlle}>
                         <View style={styles.demoNeck} />
                         <View style={styles.demoBody}>
-                            <View style={[styles.demoLayer, { backgroundColor: '#FF6B6B' }]} />
-                            <View style={[styles.demoLayer, { backgroundColor: '#4ECDC4' }]} />
-                            <View style={[styles.demoLayer, { backgroundColor: '#FFE66D' }]} />
-                            <View style={[styles.demoLayer, { backgroundColor: '#A855F7' }]} />
+                            <View style={[styles.demoLayer, { backgroundColor: '#E63946' }]} />
+                            <View style={[styles.demoLayer, { backgroundColor: '#00B4D8' }]} />
+                            <View style={[styles.demoLayer, { backgroundColor: '#FFCE03' }]} />
+                            <View style={[styles.demoLayer, { backgroundColor: '#9B5DE5' }]} />
                         </View>
                     </View>
                 </Animated.View>
@@ -144,8 +147,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 30,
     },
+    // Main bottle
     bottleIllustration: {
-        marginBottom: 30,
+        marginBottom: 20,
     },
     demoBotlle: {
         alignItems: 'center',
@@ -175,7 +179,7 @@ const styles = StyleSheet.create({
     },
     titleContainer: {
         alignItems: 'center',
-        marginBottom: 50,
+        marginBottom: 40,
     },
     title: {
         fontSize: 42,
