@@ -66,29 +66,24 @@ const Bottle = ({
         }
     }, [isSelected]);
 
-    // Celebration animation when bottle is complete
+    // Celebration animation when bottle is complete - quick subtle pulse with sparkle
     useEffect(() => {
         if (isComplete) {
-            // Pulse glow
-            celebrationGlow.value = withRepeat(
-                withSequence(
-                    withTiming(1, { duration: 800, easing: Easing.out(Easing.cubic) }),
-                    withTiming(0.3, { duration: 800, easing: Easing.in(Easing.cubic) })
-                ),
-                -1,
-                true
+            // Quick subtle glow flash
+            celebrationGlow.value = withSequence(
+                withTiming(0.7, { duration: 150 }),
+                withTiming(0, { duration: 400, easing: Easing.out(Easing.cubic) })
             );
-            // Sparkle rotation
-            sparkleRotation.value = withRepeat(
-                withTiming(360, { duration: 3000, easing: Easing.linear }),
-                -1,
-                false
+            // Slight scale pulse
+            scale.value = withSequence(
+                withTiming(1.08, { duration: 150 }),
+                withSpring(1, { damping: 10 })
             );
-            // Sparkle scale in
-            sparkleScale.value = withSpring(1, { damping: 8 });
-        } else {
-            celebrationGlow.value = withTiming(0, { duration: 300 });
-            sparkleScale.value = withTiming(0, { duration: 200 });
+            // Quick sparkle burst
+            sparkleScale.value = withSequence(
+                withTiming(1, { duration: 150 }),
+                withDelay(200, withTiming(0, { duration: 300 }))
+            );
         }
     }, [isComplete]);
 
@@ -186,10 +181,10 @@ const Bottle = ({
                 />
             )}
 
-            {/* Sparkle effects around complete bottle */}
+            {/* Small sparkles */}
             {isComplete && (
                 <Animated.View style={[styles.sparkleContainer, sparkleStyle]}>
-                    {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => (
+                    {[0, 90, 180, 270].map((angle) => (
                         <View
                             key={angle}
                             style={[
@@ -197,9 +192,9 @@ const Bottle = ({
                                 {
                                     transform: [
                                         { rotate: `${angle}deg` },
-                                        { translateY: -55 },
+                                        { translateY: -50 },
                                     ],
-                                    backgroundColor: i % 2 === 0 ? bottleColor : '#FFFFFF',
+                                    backgroundColor: '#FFFFFF',
                                 }
                             ]}
                         />
