@@ -4,15 +4,15 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { generateLevel, LEVELS_CONFIG } from '../engine/levelGenerator';
 
-// Color palette for the game
+// Color palette for the game - all bright, vibrant, distinct colors
 export const COLORS = {
-  red: '#FF6B6B',
-  blue: '#4ECDC4',
-  yellow: '#FFE66D',
-  purple: '#A855F7',
-  green: '#22C55E',
-  orange: '#FB923C',
-  pink: '#EC4899',
+  red: '#E63946',      // Bright red
+  blue: '#00B4D8',     // Bright cyan-blue  
+  yellow: '#FFCE03',   // Bright yellow
+  purple: '#9B5DE5',   // Vivid purple
+  green: '#06D6A0',    // Bright teal-green
+  orange: '#FF6B35',   // Bright orange
+  pink: '#FF69B4',     // Hot pink
 };
 
 export const COLOR_NAMES = Object.keys(COLORS);
