@@ -225,6 +225,17 @@ const useGameStore = create(
       toggleSound: () => {
         set(state => ({ isSoundEnabled: !state.isSoundEnabled }));
       },
+
+      // Play a specific unlocked level (for level select)
+      playLevel: (levelNum) => {
+        const { currentLevel } = get();
+        // Only allow playing levels up to the highest unlocked level
+        if (levelNum <= currentLevel) {
+          get().initLevel(levelNum);
+          return true;
+        }
+        return false;
+      },
     }),
     {
       name: 'color-bottle-sort-storage',

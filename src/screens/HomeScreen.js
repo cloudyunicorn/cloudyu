@@ -25,6 +25,7 @@ const HomeScreen = ({ navigation }) => {
     const currentLevel = useGameStore(state => state.currentLevel);
     const loadSavedProgress = useGameStore(state => state.loadSavedProgress);
 
+
     // Animated bottle illustration
     const bottleRotate = useSharedValue(0);
     const bottleScale = useSharedValue(1);
@@ -59,6 +60,7 @@ const HomeScreen = ({ navigation }) => {
         loadSavedProgress();
         navigation.navigate('Game');
     };
+
 
 
     return (
@@ -103,6 +105,14 @@ const HomeScreen = ({ navigation }) => {
                             {currentLevel > 1 ? `Continue Level ${currentLevel}` : 'Play'}
                         </Text>
                     </LinearGradient>
+                </TouchableOpacity>
+
+                {/* Level Select Button */}
+                <TouchableOpacity
+                    style={styles.levelSelectButton}
+                    onPress={() => navigation.navigate('LevelSelect')}
+                >
+                    <Text style={styles.levelSelectText}>📋 Select Level</Text>
                 </TouchableOpacity>
 
                 {/* Settings Button */}
@@ -204,6 +214,21 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         color: '#FFFFFF',
+    },
+    levelSelectButton: {
+        width: '80%',
+        paddingVertical: 14,
+        marginBottom: 16,
+        borderRadius: 12,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        borderWidth: 1,
+        borderColor: 'rgba(78, 205, 196, 0.4)',
+        alignItems: 'center',
+    },
+    levelSelectText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#4ECDC4',
     },
     settingsButton: {
         paddingVertical: 12,
