@@ -5,6 +5,7 @@ import { useAudioPlayer } from 'expo-audio';
 const SOUND_FILES = {
     pour: require('../../assets/sounds/pour-liquid.wav'),
     success: require('../../assets/sounds/male-victory.wav'),
+    bottleComplete: require('../../assets/sounds/bottle-complete.wav'),
 };
 
 // Sound manager using expo-audio
@@ -13,6 +14,7 @@ class SoundManager {
         this.players = {
             pour: null,
             success: null,
+            bottleComplete: null,
         };
         this.loaded = false;
     }
@@ -46,6 +48,16 @@ class SoundManager {
             player.play();
         } catch (error) {
             console.log('Success sound error:', error);
+        }
+    }
+
+    async playBottleComplete() {
+        try {
+            const { createAudioPlayer } = await import('expo-audio');
+            const player = createAudioPlayer(SOUND_FILES.bottleComplete);
+            player.play();
+        } catch (error) {
+            console.log('Bottle complete sound error:', error);
         }
     }
 

@@ -1,5 +1,5 @@
 // Bottle Component - Main bottle with liquid layers and pour animations
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import Animated, {
     useSharedValue,
@@ -14,6 +14,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import LiquidLayer from './LiquidLayer';
 import { COLORS } from '../store/gameStore';
+import useGameStore from '../store/gameStore';
+import { soundManager } from '../engine/gameLoop';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -45,6 +47,10 @@ const Bottle = ({
         return colors.every(c => c === colors[0]);
     }, [bottle.layers]);
 
+    // Track previous complete state to detect when bottle becomes complete
+    const wasComplete = useRef(isComplete);
+    const isSoundEnabled = useGameStore(state => state.isSoundEnabled);
+
     // Get the bottle's color for celebration effect
     const bottleColor = useMemo(() => {
         if (!isComplete) return null;
@@ -68,7 +74,11 @@ const Bottle = ({
 
     // Celebration animation when bottle is complete - quick subtle pulse with sparkle
     useEffect(() => {
-        if (isComplete) {
+        if (isComplete && !wasComplete.current) {
+            // Bottle just became complete - play sound
+            if (isSoundEnabled) {
+                soundManager.playBottleComplete();
+            }
             // Quick subtle glow flash
             celebrationGlow.value = withSequence(
                 withTiming(0.7, { duration: 150 }),
@@ -85,7 +95,8 @@ const Bottle = ({
                 withDelay(200, withTiming(0, { duration: 300 }))
             );
         }
-    }, [isComplete]);
+        wasComplete.current = isComplete;
+    }, [isComplete, isSoundEnabled]);
 
     // Pour animation - tilt bottle when pouring
     useEffect(() => {
