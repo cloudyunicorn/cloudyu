@@ -1,5 +1,5 @@
 // Bottle Component - Main bottle with liquid layers and pour animations
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import Animated, {
     useSharedValue,
@@ -8,9 +8,12 @@ import Animated, {
     withSequence,
     withTiming,
     withDelay,
+    withRepeat,
     Easing,
+    interpolate,
 } from 'react-native-reanimated';
 import LiquidLayer from './LiquidLayer';
+import { COLORS } from '../store/gameStore';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -30,6 +33,25 @@ const Bottle = ({
     const rotation = useSharedValue(0);
     const glowOpacity = useSharedValue(0);
 
+    // Celebration animation values
+    const celebrationGlow = useSharedValue(0);
+    const sparkleRotation = useSharedValue(0);
+    const sparkleScale = useSharedValue(0);
+
+    // Check if bottle is complete (4 of same color)
+    const isComplete = useMemo(() => {
+        const colors = bottle.layers.filter(l => l !== null);
+        if (colors.length !== 4) return false;
+        return colors.every(c => c === colors[0]);
+    }, [bottle.layers]);
+
+    // Get the bottle's color for celebration effect
+    const bottleColor = useMemo(() => {
+        if (!isComplete) return null;
+        const colorName = bottle.layers[0];
+        return COLORS[colorName] || '#4ECDC4';
+    }, [isComplete, bottle.layers]);
+
     // Selection glow effect
     useEffect(() => {
         if (isSelected) {
@@ -43,6 +65,32 @@ const Bottle = ({
             translateY.value = withSpring(0);
         }
     }, [isSelected]);
+
+    // Celebration animation when bottle is complete
+    useEffect(() => {
+        if (isComplete) {
+            // Pulse glow
+            celebrationGlow.value = withRepeat(
+                withSequence(
+                    withTiming(1, { duration: 800, easing: Easing.out(Easing.cubic) }),
+                    withTiming(0.3, { duration: 800, easing: Easing.in(Easing.cubic) })
+                ),
+                -1,
+                true
+            );
+            // Sparkle rotation
+            sparkleRotation.value = withRepeat(
+                withTiming(360, { duration: 3000, easing: Easing.linear }),
+                -1,
+                false
+            );
+            // Sparkle scale in
+            sparkleScale.value = withSpring(1, { damping: 8 });
+        } else {
+            celebrationGlow.value = withTiming(0, { duration: 300 });
+            sparkleScale.value = withTiming(0, { duration: 200 });
+        }
+    }, [isComplete]);
 
     // Pour animation - tilt bottle when pouring
     useEffect(() => {
@@ -93,6 +141,23 @@ const Bottle = ({
         opacity: glowOpacity.value,
     }));
 
+    // Celebration glow style
+    const celebrationGlowStyle = useAnimatedStyle(() => ({
+        opacity: celebrationGlow.value * 0.6,
+        transform: [
+            { scale: interpolate(celebrationGlow.value, [0.3, 1], [1, 1.15]) }
+        ],
+    }));
+
+    // Sparkle animation style
+    const sparkleStyle = useAnimatedStyle(() => ({
+        transform: [
+            { rotate: `${sparkleRotation.value}deg` },
+            { scale: sparkleScale.value }
+        ],
+        opacity: sparkleScale.value,
+    }));
+
     // Render layers from bottom to top (index 0 is bottom)
     const layers = [...bottle.layers];
 
@@ -110,7 +175,39 @@ const Bottle = ({
             style={[styles.container, animatedStyle]}
             onPress={onPress}
         >
-            {/* Glow effect */}
+            {/* Celebration glow effect */}
+            {isComplete && (
+                <Animated.View
+                    style={[
+                        styles.celebrationGlow,
+                        celebrationGlowStyle,
+                        { backgroundColor: bottleColor, shadowColor: bottleColor }
+                    ]}
+                />
+            )}
+
+            {/* Sparkle effects around complete bottle */}
+            {isComplete && (
+                <Animated.View style={[styles.sparkleContainer, sparkleStyle]}>
+                    {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => (
+                        <View
+                            key={angle}
+                            style={[
+                                styles.sparkle,
+                                {
+                                    transform: [
+                                        { rotate: `${angle}deg` },
+                                        { translateY: -55 },
+                                    ],
+                                    backgroundColor: i % 2 === 0 ? bottleColor : '#FFFFFF',
+                                }
+                            ]}
+                        />
+                    ))}
+                </Animated.View>
+            )}
+
+            {/* Selection glow effect */}
             <Animated.View style={[styles.glow, glowStyle]} />
 
             {/* Bottle body */}
@@ -160,6 +257,31 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.8,
         shadowRadius: 15,
         elevation: 10,
+    },
+    celebrationGlow: {
+        position: 'absolute',
+        top: -5,
+        left: -5,
+        right: -5,
+        bottom: -5,
+        borderRadius: 20,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.8,
+        shadowRadius: 20,
+        elevation: 8,
+    },
+    sparkleContainer: {
+        position: 'absolute',
+        width: 110,
+        height: 110,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    sparkle: {
+        position: 'absolute',
+        width: 4,
+        height: 4,
+        borderRadius: 2,
     },
     bottle: {
         width: 50,
