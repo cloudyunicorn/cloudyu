@@ -1,5 +1,5 @@
 // GameScreen - Main gameplay screen
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import {
     View,
     StyleSheet,
@@ -25,19 +25,36 @@ const GameScreen = ({ navigation }) => {
     const nextLevel = useGameStore(state => state.nextLevel);
     const history = useGameStore(state => state.history);
 
+    // Delayed win modal display - wait for animation to complete
+    const [showWinModal, setShowWinModal] = useState(false);
+
     useEffect(() => {
         // Load sounds on mount
         soundManager.loadSounds();
     }, []);
+
+    // Handle delayed win modal display
+    useEffect(() => {
+        if (isWon && !showWinModal) {
+            // Wait for pour animation to complete (600ms) before showing modal
+            const timer = setTimeout(() => {
+                setShowWinModal(true);
+                if (isSoundEnabled) {
+                    soundManager.playSuccess();
+                }
+            }, 600);
+            return () => clearTimeout(timer);
+        } else if (!isWon) {
+            setShowWinModal(false);
+        }
+    }, [isWon, isSoundEnabled]);
 
     const handlePourResult = useCallback((result) => {
         if (!isSoundEnabled) return;
 
         if (result.action === 'poured') {
             soundManager.playPour();
-            if (result.isWon) {
-                setTimeout(() => soundManager.playSuccess(), 300);
-            }
+            // Don't play success sound here anymore - handled in useEffect above
         } else if (result.action === 'error') {
             soundManager.playError();
         }
@@ -93,9 +110,9 @@ const GameScreen = ({ navigation }) => {
                 </View>
             </SafeAreaView>
 
-            {/* Win Modal */}
+            {/* Win Modal - delayed to let animation complete */}
             <WinModal
-                visible={isWon}
+                visible={showWinModal}
                 level={level}
                 moves={moves}
                 onNextLevel={handleNextLevel}
